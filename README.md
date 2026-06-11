@@ -13,7 +13,10 @@ PyTorch build ever published:
 - Linux (x86_64, aarch64, s390x), Windows (x86_64, arm64), macOS (x86_64, arm64)
 
 A GPU picker tells you which builds your card can run (by compute capability for
-NVIDIA, gfx architecture for AMD).
+NVIDIA, gfx architecture for AMD), including platform constraints — e.g. NVIDIA
+Jetson is Linux aarch64 only and needs
+[NVIDIA's JetPack wheels](https://docs.nvidia.com/deeplearning/frameworks/install-pytorch-jetson-platform/index.html)
+rather than the SBSA server wheels on download.pytorch.org.
 
 ## How it works
 
@@ -63,6 +66,17 @@ python -m http.server -d _site    # browse at http://localhost:8000
 
 The wheel matrix updates itself. The small curated files change only when NVIDIA
 or AMD ship something new — each file carries a `_source` URL; PRs welcome.
+
+On top of that, a second workflow
+([hardware-watch.yml](.github/workflows/hardware-watch.yml)) runs
+[Claude Code](https://github.com/anthropics/claude-code-action) weekly: it
+compares the curated files against the NVIDIA CUDA release notes, AMD's ROCm
+system requirements, the PyTorch release notes, and the accelerator versions
+appearing in the wheel matrix, and **opens a pull request** when new hardware or
+toolkit versions are missing. It requires an `ANTHROPIC_API_KEY` repository
+secret (Settings → Secrets and variables → Actions) and skips quietly when the
+secret is absent. Changes always arrive as a PR for human review, never as a
+direct push.
 
 ## Acknowledgements
 

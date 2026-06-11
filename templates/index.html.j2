@@ -84,6 +84,9 @@
         architectures (<code>TORCH_CUDA_ARCH_LIST</code>), so treat results as an upper bound and check with
         <code>torch.cuda.is_available()</code>.</li>
       <li><strong>macOS</strong> CPU wheels include MPS (Metal) acceleration on Apple Silicon for PyTorch ≥ 1.12.</li>
+      <li><strong>NVIDIA Jetson</strong> (Xavier, Orin) is Linux aarch64 only and uses
+        <a href="https://docs.nvidia.com/deeplearning/frameworks/install-pytorch-jetson-platform/index.html">NVIDIA's JetPack-specific wheels</a> —
+        the aarch64 CUDA wheels here target SBSA servers (e.g. GH200).</li>
       <li><strong>Intel XPU</strong> wheels need <a href="https://www.intel.com/content/www/us/en/developer/articles/tool/pytorch-prerequisites-for-intel-gpu/2-9.html">Intel GPU drivers</a>.</li>
     </ul>
   </section>

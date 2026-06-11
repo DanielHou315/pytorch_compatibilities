@@ -1,0 +1,73 @@
+# Weekly: Claude checks vendor release notes for new hardware / toolkit
+# releases and opens a PR updating the curated data files when they're stale.
+# Requires the ANTHROPIC_API_KEY repository secret; skips quietly without it.
+name: Hardware support watch (Claude)
+
+on:
+  schedule:
+    - cron: "23 7 * * 1" # weekly, Monday morning UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for API key
+        id: key
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -n "$ANTHROPIC_API_KEY" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "ANTHROPIC_API_KEY secret not set; skipping hardware watch."
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.key.outputs.present == 'true'
+
+      - uses: anthropics/claude-code-action@v1
+        if: steps.key.outputs.present == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_args: "--model claude-opus-4-8"
+          prompt: |
+            You maintain the curated hardware-compatibility data of this PyTorch
+            compatibility site. The wheel matrix (data/torch_matrix.json) updates
+            itself; your job is the hand-curated files:
+              - data/cuda_drivers.json    (CUDA toolkit -> minimum NVIDIA driver)
+              - data/cuda_sm_support.json (CUDA toolkit -> supported compute capabilities)
+              - data/rocm_support.json    (ROCm version -> officially supported gfx targets)
+              - data/gpus.json            (GPU name -> architecture, plus os/arch constraints)
+
+            Steps:
+            1. Read the four data files and note the newest entries in each.
+            2. Check primary sources for anything newer:
+               - https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html
+                 (new CUDA toolkit versions and their minimum driver versions)
+               - https://rocm.docs.amd.com/projects/install-on-linux/en/latest/reference/system-requirements.html
+                 (ROCm supported GPU architectures)
+               - `gh release list --repo pytorch/pytorch --limit 5` and the release
+                 notes of the newest release (`gh release view <tag> --repo pytorch/pytorch`)
+                 for newly supported accelerator versions or hardware (new CUDA/ROCm/XPU
+                 variants, new GPU architectures like new sm_/gfx targets).
+               - data/torch_matrix.json accelerator versions: every CUDA version that
+                 appears there must have entries in cuda_drivers.json and
+                 cuda_sm_support.json; every ROCm minor version must resolve in
+                 rocm_support.json.
+            3. If everything is already covered, print "No updates needed" and stop —
+               do not create a branch or PR.
+            4. Otherwise update the data files (preserve formatting and the _source/
+               _comment fields, cite the sources you used), run `python -m pytest -q`
+               to make sure tests still pass, then:
+               - create a branch named chore/hardware-watch-<YYYYMMDD>
+               - commit the changes
+               - push and open a PR with `gh pr create`, describing exactly what
+                 changed and linking the sources. Never push directly to main.

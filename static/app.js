@@ -1,9 +1,10 @@
 "use strict";
 
 const DATA = JSON.parse(document.getElementById("dataset").textContent);
-const MAX_ROWS = 200;
 
 const ACCEL_LABELS = { cuda: "CUDA", rocm: "ROCm", xpu: "Intel XPU", cpu: "CPU" };
+// Which GPU vendors are relevant when an accelerator type is selected.
+const ACCEL_VENDORS = { cuda: ["nvidia"], rocm: ["amd"], xpu: ["intel"], cpu: ["apple"] };
 const OS_LABELS = { linux: "Linux", windows: "Windows", macos: "macOS" };
 
 const els = {
@@ -55,7 +56,16 @@ function initFilters() {
     const [os, arch] = v.split("/");
     return [v, `${OS_LABELS[os] || os} ${arch}`];
   }));
-  fillSelect(els.gpu, DATA.gpus.map((g) => [g.arch + "|" + g.vendor, g.name]), { anyLabel: "— select to check your GPU —" });
+  fillGpuOptions();
+}
+
+function fillGpuOptions() {
+  const vendors = ACCEL_VENDORS[els.accel.value] || null;
+  const options = DATA.gpus
+    .map((g, i) => [String(i), g.name, g.vendor])
+    .filter(([, , vendor]) => !vendors || vendors.includes(vendor))
+    .map(([value, label]) => [value, label]);
+  fillSelect(els.gpu, options, { anyLabel: "— select to check your GPU —" });
 }
 
 function fillAccelVersions() {
@@ -77,11 +87,14 @@ function rocmEntry(ver) {
 
 function selectedGpu() {
   if (!els.gpu.value) return null;
-  const [arch, vendor] = els.gpu.value.split("|");
-  return { arch, vendor };
+  return DATA.gpus[Number(els.gpu.value)] || null;
 }
 
 function gpuSupportsRow(gpu, c) {
+  // Hard-coded platform constraints (e.g. Jetson is Linux aarch64 only).
+  if (gpu.only_os && c.os !== gpu.only_os) return false;
+  if (gpu.only_arch && c.arch !== gpu.only_arch) return false;
+
   if (gpu.vendor === "nvidia") {
     if (c.accel !== "cuda") return c.accel === "cpu";
     const sms = DATA.cuda_sm_support[c.accel_ver];
@@ -91,6 +104,12 @@ function gpuSupportsRow(gpu, c) {
     if (c.accel !== "rocm") return c.accel === "cpu";
     const gfx = rocmEntry(c.accel_ver);
     return !!gfx && gfx.includes(gpu.arch);
+  }
+  if (gpu.vendor === "intel") {
+    return c.accel === "xpu" || c.accel === "cpu";
+  }
+  if (gpu.vendor === "apple") {
+    return c.accel === "cpu";
   }
   return true;
 }
@@ -142,7 +161,7 @@ function accelCell(c) {
 function render() {
   const rows = DATA.combos.filter(matches);
   els.tbody.replaceChildren();
-  for (const c of rows.slice(0, MAX_ROWS)) {
+  for (const c of rows) {
     const tr = document.createElement("tr");
 
     const cells = [
@@ -179,17 +198,28 @@ function render() {
   }
 
   els.count.textContent =
-    rows.length > MAX_ROWS
-      ? `Showing first ${MAX_ROWS} of ${rows.length} matching combinations — narrow the filters to see the rest.`
-      : `${rows.length} matching combination${rows.length === 1 ? "" : "s"}.`;
+    `${rows.length} matching combination${rows.length === 1 ? "" : "s"}.`;
 
   const gpu = selectedGpu();
   els.gpuNote.hidden = !gpu;
-  if (gpu) {
-    els.gpuNote.textContent =
-      gpu.vendor === "nvidia"
-        ? `Showing CUDA builds whose toolkit supports compute capability ${gpu.arch} (plus CPU builds). Official wheels may target fewer architectures — verify with torch.cuda.is_available().`
-        : `Showing ROCm builds that officially support ${gpu.arch} (plus CPU builds). Unlisted GPUs often still work, e.g. via HSA_OVERRIDE_GFX_VERSION.`;
+  if (gpu) renderGpuNote(gpu);
+}
+
+function renderGpuNote(gpu) {
+  const vendorText = {
+    nvidia: `Showing CUDA builds whose toolkit supports compute capability ${gpu.arch} (plus CPU builds). Official wheels may target fewer architectures — verify with torch.cuda.is_available().`,
+    amd: `Showing ROCm builds that officially support ${gpu.arch} (plus CPU builds). Unlisted GPUs often still work, e.g. via HSA_OVERRIDE_GFX_VERSION.`,
+    intel: "Showing Intel XPU builds (plus CPU builds). Intel GPU drivers are required.",
+    apple: "Showing macOS arm64 builds.",
+  };
+  els.gpuNote.replaceChildren();
+  const parts = [vendorText[gpu.vendor] || "", gpu.note || ""].filter(Boolean);
+  els.gpuNote.append(parts.join(" "));
+  if (gpu.note_url) {
+    const link = document.createElement("a");
+    link.href = gpu.note_url;
+    link.textContent = "Official install guide.";
+    els.gpuNote.append(" ", link);
   }
 }
 
@@ -198,6 +228,7 @@ for (const el of [els.torch, els.accelVer, els.python, els.os, els.gpu]) {
 }
 els.accel.addEventListener("change", () => {
   fillAccelVersions();
+  fillGpuOptions();
   render();
 });
 els.reset.addEventListener("click", () => {
@@ -210,3 +241,11 @@ els.reset.addEventListener("click", () => {
 
 initFilters();
 render();
+
+// Browsers may restore previous <select> state after scripts run (reload /
+// back-forward); re-sync the dependent options and table once settled.
+window.addEventListener("load", () => {
+  fillAccelVersions();
+  fillGpuOptions();
+  render();
+});
