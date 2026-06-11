@@ -49,11 +49,24 @@ class TestGpus:
         vendors = {g["vendor"] for g in _load("gpus.json")["gpus"]}
         assert {"nvidia", "amd", "intel", "apple"} <= vendors
 
-    def test_jetson_has_no_official_wheels(self):
-        # Jetson must match zero rows (the SBSA aarch64 wheels don't run on
-        # it, and there are no Windows wheels for it either) and explain why.
+    def test_jetson_wheel_availability(self):
+        # Pre-Thor Jetson must match zero rows (the SBSA aarch64 wheels don't
+        # run on it, and there are no Windows wheels for it either) and explain
+        # why. Jetson Thor is the exception: JetPack 7 adopts the unified SBSA
+        # aarch64 CUDA stack, so standard wheels apply.
         jetsons = [g for g in _load("gpus.json")["gpus"] if "Jetson" in g["name"]]
-        assert jetsons
+        assert len(jetsons) >= 3
         for g in jetsons:
-            assert g.get("no_official_wheels") is True, g
             assert g.get("note") and g.get("note_url"), f"{g['name']} needs a JetPack note"
+            assert g.get("only_os") == "linux" and g.get("only_arch") == "aarch64", g
+            expected = None if "Thor" in g["name"] else True
+            assert g.get("no_official_wheels") is expected, g
+
+    def test_gpu_list_newest_first_within_vendor(self):
+        nvidia = [g["arch"] for g in _load("gpus.json")["gpus"] if g["vendor"] == "nvidia"]
+        as_floats = [float(a) for a in nvidia]
+        assert as_floats == sorted(as_floats, reverse=True), nvidia
+
+    def test_dgx_spark_and_thor_present(self):
+        names = " ".join(g["name"] for g in _load("gpus.json")["gpus"])
+        assert "DGX Spark" in names and "Jetson Thor" in names

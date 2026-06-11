@@ -55,6 +55,10 @@ code {
   margin-bottom: 1rem;
 }
 
+/* Forces the following filter (Your GPU) onto its own row, so it doesn't
+   jump between rows as other dropdowns change width. */
+.flex-break { flex-basis: 100%; height: 0; }
+
 .filter { display: flex; flex-direction: column; gap: .25rem; }
 .filter label { font-size: .75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; }
 
