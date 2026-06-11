@@ -49,9 +49,11 @@ class TestGpus:
         vendors = {g["vendor"] for g in _load("gpus.json")["gpus"]}
         assert {"nvidia", "amd", "intel", "apple"} <= vendors
 
-    def test_jetson_constrained_to_linux_aarch64(self):
+    def test_jetson_has_no_official_wheels(self):
+        # Jetson must match zero rows (the SBSA aarch64 wheels don't run on
+        # it, and there are no Windows wheels for it either) and explain why.
         jetsons = [g for g in _load("gpus.json")["gpus"] if "Jetson" in g["name"]]
         assert jetsons
         for g in jetsons:
-            assert g["only_os"] == "linux" and g["only_arch"] == "aarch64", g
-            assert g.get("note"), f"{g['name']} needs a JetPack note"
+            assert g.get("no_official_wheels") is True, g
+            assert g.get("note") and g.get("note_url"), f"{g['name']} needs a JetPack note"

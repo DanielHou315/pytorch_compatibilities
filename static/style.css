@@ -112,6 +112,25 @@ td.cmd code { user-select: all; }
   color: var(--muted);
 }
 
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.pager button.current {
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.pager button:disabled:not(.current) {
+  opacity: .45;
+  cursor: default;
+}
+
 .notes { margin-top: 2.5rem; }
 .notes h2 { font-size: 1.1rem; }
 .notes li { margin-bottom: .4rem; }

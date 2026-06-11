@@ -2,9 +2,19 @@
 
 const DATA = JSON.parse(document.getElementById("dataset").textContent);
 
-const ACCEL_LABELS = { cuda: "CUDA", rocm: "ROCm", xpu: "Intel XPU", cpu: "CPU" };
+const PAGE_SIZE = 200;
+
+const ACCEL_LABELS = { cuda: "CUDA", rocm: "ROCm", xpu: "Intel XPU", cpu: "CPU", mps: "Apple Silicon (MPS)" };
 // Which GPU vendors are relevant when an accelerator type is selected.
-const ACCEL_VENDORS = { cuda: ["nvidia"], rocm: ["amd"], xpu: ["intel"], cpu: ["apple"] };
+const ACCEL_VENDORS = { cuda: ["nvidia"], rocm: ["amd"], xpu: ["intel"], cpu: [], mps: ["apple"] };
+
+// "Apple Silicon (MPS)" is a virtual accelerator: MPS ships inside the macOS
+// arm64 CPU wheels, so it selects those rows rather than a wheel variant.
+function matchesAccel(c, accel) {
+  if (!accel) return true;
+  if (accel === "mps") return c.accel === "cpu" && c.os === "macos" && c.arch === "arm64";
+  return c.accel === accel;
+}
 const OS_LABELS = { linux: "Linux", windows: "Windows", macos: "macOS" };
 
 const els = {
@@ -18,7 +28,10 @@ const els = {
   count: document.getElementById("count"),
   gpuNote: document.getElementById("gpu-note"),
   tbody: document.querySelector("#results tbody"),
+  pager: document.getElementById("pager"),
 };
+
+let currentPage = 1;
 
 function versionKey(v) {
   return v.split(/[.+-]|post/).map((p) => (/^\d+$/.test(p) ? +p : -1));
@@ -70,11 +83,12 @@ function fillGpuOptions() {
 
 function fillAccelVersions() {
   const accel = els.accel.value;
-  const vers = uniqueSortedDesc(
-    DATA.combos
-      .filter((c) => (!accel || c.accel === accel) && c.accel_ver)
-      .map((c) => c.accel_ver)
-  );
+  // Version options only make sense once an accelerator type is chosen.
+  const vers = !accel || accel === "cpu" || accel === "mps"
+    ? []
+    : uniqueSortedDesc(
+        DATA.combos.filter((c) => c.accel === accel && c.accel_ver).map((c) => c.accel_ver)
+      );
   fillSelect(els.accelVer, vers.map((v) => [v, v]));
 }
 
@@ -91,7 +105,11 @@ function selectedGpu() {
 }
 
 function gpuSupportsRow(gpu, c) {
-  // Hard-coded platform constraints (e.g. Jetson is Linux aarch64 only).
+  // No official wheels exist for this device (e.g. Jetson) — match nothing;
+  // the GPU note explains where to get wheels instead.
+  if (gpu.no_official_wheels) return false;
+
+  // Hard-coded platform constraints (e.g. ROCm GPUs are Linux only).
   if (gpu.only_os && c.os !== gpu.only_os) return false;
   if (gpu.only_arch && c.arch !== gpu.only_arch) return false;
 
@@ -116,7 +134,7 @@ function gpuSupportsRow(gpu, c) {
 
 function matches(c) {
   if (els.torch.value && c.torch !== els.torch.value) return false;
-  if (els.accel.value && c.accel !== els.accel.value) return false;
+  if (!matchesAccel(c, els.accel.value)) return false;
   if (els.accelVer.value && c.accel_ver !== els.accelVer.value) return false;
   if (els.python.value && !c.python.includes(els.python.value)) return false;
   if (els.os.value && `${c.os}/${c.arch}` !== els.os.value) return false;
@@ -160,8 +178,13 @@ function accelCell(c) {
 
 function render() {
   const rows = DATA.combos.filter(matches);
+  const pages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+  currentPage = Math.min(Math.max(1, currentPage), pages);
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const pageRows = rows.slice(start, start + PAGE_SIZE);
+
   els.tbody.replaceChildren();
-  for (const c of rows) {
+  for (const c of pageRows) {
     const tr = document.createElement("tr");
 
     const cells = [
@@ -198,11 +221,37 @@ function render() {
   }
 
   els.count.textContent =
-    `${rows.length} matching combination${rows.length === 1 ? "" : "s"}.`;
+    rows.length > PAGE_SIZE
+      ? `Showing ${start + 1}–${start + pageRows.length} of ${rows.length} matching combinations.`
+      : `${rows.length} matching combination${rows.length === 1 ? "" : "s"}.`;
+  renderPager(pages);
 
   const gpu = selectedGpu();
   els.gpuNote.hidden = !gpu;
   if (gpu) renderGpuNote(gpu);
+}
+
+function renderPager(pages) {
+  els.pager.replaceChildren();
+  if (pages <= 1) return;
+
+  const addButton = (label, page, { disabled = false, current = false } = {}) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = label;
+    btn.disabled = disabled || current;
+    if (current) btn.className = "current";
+    btn.addEventListener("click", () => {
+      currentPage = page;
+      render();
+      document.getElementById("results").scrollIntoView({ block: "start" });
+    });
+    els.pager.appendChild(btn);
+  };
+
+  addButton("‹ Prev", currentPage - 1, { disabled: currentPage === 1 });
+  for (let p = 1; p <= pages; p++) addButton(String(p), p, { current: p === currentPage });
+  addButton("Next ›", currentPage + 1, { disabled: currentPage === pages });
 }
 
 function renderGpuNote(gpu) {
@@ -213,7 +262,11 @@ function renderGpuNote(gpu) {
     apple: "Showing macOS arm64 builds.",
   };
   els.gpuNote.replaceChildren();
-  const parts = [vendorText[gpu.vendor] || "", gpu.note || ""].filter(Boolean);
+  // When no official wheels exist (Jetson), the vendor blurb about shown
+  // builds would contradict the empty table — show only the explanation.
+  const parts = gpu.no_official_wheels
+    ? [gpu.note || "No official wheels exist for this device."]
+    : [vendorText[gpu.vendor] || "", gpu.note || ""].filter(Boolean);
   els.gpuNote.append(parts.join(" "));
   if (gpu.note_url) {
     const link = document.createElement("a");
@@ -223,20 +276,26 @@ function renderGpuNote(gpu) {
   }
 }
 
+function onFilterChange() {
+  currentPage = 1;
+  render();
+}
+
 for (const el of [els.torch, els.accelVer, els.python, els.os, els.gpu]) {
-  el.addEventListener("change", render);
+  el.addEventListener("change", onFilterChange);
 }
 els.accel.addEventListener("change", () => {
   fillAccelVersions();
   fillGpuOptions();
-  render();
+  onFilterChange();
 });
 els.reset.addEventListener("click", () => {
   for (const el of [els.torch, els.accel, els.accelVer, els.python, els.os, els.gpu]) {
     el.value = "";
   }
   fillAccelVersions();
-  render();
+  fillGpuOptions();
+  onFilterChange();
 });
 
 initFilters();
