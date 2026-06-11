@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PyTorch Compatibility Matrix — CUDA, ROCm, XPU &amp; CPU</title>
+  <meta name="description" content="Find compatible combinations of PyTorch, Python, CUDA, ROCm and Intel XPU versions, minimum NVIDIA driver versions, supported AMD GPU architectures, and the matching pip install command.">
+  <link rel="canonical" href="https://{{ domain }}/">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔥</text></svg>">
+</head>
+<body>
+<header>
+  <h1>🔥 PyTorch Compatibility Matrix</h1>
+  <p class="subtitle">
+    Every official PyTorch build — CUDA, ROCm, Intel XPU and CPU — with the Python versions,
+    platforms, minimum drivers and the exact <code>pip install</code> command.
+  </p>
+  <p class="meta">
+    Data scraped automatically from
+    <a href="https://download.pytorch.org/whl/torch/">download.pytorch.org</a>
+    · last updated <time datetime="{{ generated_utc }}">{{ generated_utc }}</time>
+    · {{ n_combos }} build combinations
+    · <a href="https://github.com/DanielHou315/pytorch_compatibilities">source on GitHub</a>
+  </p>
+</header>
+
+<main>
+  <section class="filters" aria-label="Filters">
+    <div class="filter">
+      <label for="f-torch">PyTorch</label>
+      <select id="f-torch"></select>
+    </div>
+    <div class="filter">
+      <label for="f-accel">Accelerator</label>
+      <select id="f-accel"></select>
+    </div>
+    <div class="filter">
+      <label for="f-accel-ver">Accelerator version</label>
+      <select id="f-accel-ver"></select>
+    </div>
+    <div class="filter">
+      <label for="f-python">Python</label>
+      <select id="f-python"></select>
+    </div>
+    <div class="filter">
+      <label for="f-os">OS / Arch</label>
+      <select id="f-os"></select>
+    </div>
+    <div class="filter">
+      <label for="f-gpu">Your GPU (optional)</label>
+      <select id="f-gpu"></select>
+    </div>
+    <button id="f-reset" type="button">Reset</button>
+  </section>
+
+  <p id="gpu-note" class="gpu-note" hidden></p>
+  <p id="count" class="count" role="status"></p>
+
+  <table id="results">
+    <thead>
+      <tr>
+        <th>PyTorch</th>
+        <th>Accelerator</th>
+        <th>Python</th>
+        <th>OS / Arch</th>
+        <th>Requirements</th>
+        <th>Install</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <section class="notes">
+    <h2>Notes</h2>
+    <ul>
+      <li><strong>Minimum driver</strong> for CUDA rows comes from the
+        <a href="https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html">NVIDIA CUDA release notes</a>.
+        Thanks to minor-version compatibility, a driver new enough for CUDA 11.x/12.x/13.x runs every toolkit of the same major version.</li>
+      <li><strong>ROCm GPU lists</strong> are the architectures officially supported per
+        <a href="https://rocm.docs.amd.com/projects/install-on-linux/en/latest/reference/system-requirements.html">AMD's documentation</a>;
+        more consumer GPUs often work unofficially (e.g. via <code>HSA_OVERRIDE_GFX_VERSION</code>).</li>
+      <li><strong>GPU filter</strong> compares against toolkit-level support — official wheels are sometimes built for fewer
+        architectures (<code>TORCH_CUDA_ARCH_LIST</code>), so treat results as an upper bound and check with
+        <code>torch.cuda.is_available()</code>.</li>
+      <li><strong>macOS</strong> CPU wheels include MPS (Metal) acceleration on Apple Silicon for PyTorch ≥ 1.12.</li>
+      <li><strong>Intel XPU</strong> wheels need <a href="https://www.intel.com/content/www/us/en/developer/articles/tool/pytorch-prerequisites-for-intel-gpu/2-9.html">Intel GPU drivers</a>.</li>
+    </ul>
+  </section>
+</main>
+
+<footer>
+  <p>
+    Built on the work of <a href="https://github.com/elenacliu/pytorch_cuda_driver_compatibilities">elenacliu/pytorch_cuda_driver_compatibilities</a> —
+    thank you, <a href="https://github.com/elenacliu">@elenacliu</a>!
+    Maintained by <a href="https://github.com/DanielHou315">Daniel Hou</a>. Updated daily by CI.
+  </p>
+</footer>
+
+<script id="dataset" type="application/json">{{ dataset_json | safe }}</script>
+<script src="app.js"></script>
+</body>
+</html>

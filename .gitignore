@@ -216,3 +216,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# torch-compat build artifacts
+_site/
+.playwright-mcp/
+*.png

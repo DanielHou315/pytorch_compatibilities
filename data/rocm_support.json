@@ -1,0 +1,30 @@
+{
+  "_source": "https://rocm.docs.amd.com/projects/install-on-linux/en/latest/reference/system-requirements.html and historical ROCm release notes",
+  "_comment": "AMD GPU architectures (gfx targets) officially supported by each ROCm minor release on Linux. Many additional consumer GPUs work unofficially (e.g. via HSA_OVERRIDE_GFX_VERSION). Keys are ROCm major.minor; patch releases inherit the minor entry.",
+  "support": {
+    "3.7": ["gfx900", "gfx906", "gfx908"],
+    "3.8": ["gfx900", "gfx906", "gfx908"],
+    "3.10": ["gfx900", "gfx906", "gfx908"],
+    "4.0": ["gfx900", "gfx906", "gfx908"],
+    "4.1": ["gfx900", "gfx906", "gfx908"],
+    "4.2": ["gfx900", "gfx906", "gfx908"],
+    "4.3": ["gfx900", "gfx906", "gfx908"],
+    "4.5": ["gfx900", "gfx906", "gfx908", "gfx90a"],
+    "5.0": ["gfx906", "gfx908", "gfx90a", "gfx1030"],
+    "5.1": ["gfx906", "gfx908", "gfx90a", "gfx1030"],
+    "5.2": ["gfx906", "gfx908", "gfx90a", "gfx1030"],
+    "5.3": ["gfx906", "gfx908", "gfx90a", "gfx1030"],
+    "5.4": ["gfx906", "gfx908", "gfx90a", "gfx1030"],
+    "5.5": ["gfx906", "gfx908", "gfx90a", "gfx1030"],
+    "5.6": ["gfx906", "gfx908", "gfx90a", "gfx1030"],
+    "5.7": ["gfx906", "gfx908", "gfx90a", "gfx1030", "gfx1100"],
+    "6.0": ["gfx906", "gfx908", "gfx90a", "gfx940", "gfx941", "gfx942", "gfx1030", "gfx1100"],
+    "6.1": ["gfx906", "gfx908", "gfx90a", "gfx940", "gfx941", "gfx942", "gfx1030", "gfx1100"],
+    "6.2": ["gfx906", "gfx908", "gfx90a", "gfx940", "gfx941", "gfx942", "gfx1030", "gfx1100", "gfx1101"],
+    "6.3": ["gfx906", "gfx908", "gfx90a", "gfx942", "gfx1030", "gfx1100", "gfx1101"],
+    "6.4": ["gfx908", "gfx90a", "gfx942", "gfx950", "gfx1030", "gfx1100", "gfx1101", "gfx1200", "gfx1201"],
+    "7.0": ["gfx908", "gfx90a", "gfx942", "gfx950", "gfx1030", "gfx1100", "gfx1101", "gfx1200", "gfx1201"],
+    "7.1": ["gfx908", "gfx90a", "gfx942", "gfx950", "gfx1030", "gfx1100", "gfx1101", "gfx1200", "gfx1201"],
+    "7.2": ["gfx908", "gfx90a", "gfx942", "gfx950", "gfx1030", "gfx1100", "gfx1101", "gfx1200", "gfx1201"]
+  }
+}

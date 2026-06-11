@@ -1,0 +1,33 @@
+{
+  "_comment": "Common GPUs and their architecture identifiers: NVIDIA compute capability (sm) or AMD gfx target. Used by the GPU lookup on the site.",
+  "gpus": [
+    {"name": "NVIDIA Tesla K40", "vendor": "nvidia", "arch": "3.5"},
+    {"name": "NVIDIA Tesla K80", "vendor": "nvidia", "arch": "3.7"},
+    {"name": "NVIDIA Tesla M60 / GTX 900 series", "vendor": "nvidia", "arch": "5.2"},
+    {"name": "NVIDIA Tesla P100", "vendor": "nvidia", "arch": "6.0"},
+    {"name": "NVIDIA GTX 10 series / Tesla P40", "vendor": "nvidia", "arch": "6.1"},
+    {"name": "NVIDIA Tesla V100 / Titan V", "vendor": "nvidia", "arch": "7.0"},
+    {"name": "NVIDIA Jetson Xavier", "vendor": "nvidia", "arch": "7.2"},
+    {"name": "NVIDIA T4 / RTX 20 series / GTX 16 series", "vendor": "nvidia", "arch": "7.5"},
+    {"name": "NVIDIA A100 / A30", "vendor": "nvidia", "arch": "8.0"},
+    {"name": "NVIDIA RTX 30 series / A40 / A10", "vendor": "nvidia", "arch": "8.6"},
+    {"name": "NVIDIA Jetson Orin", "vendor": "nvidia", "arch": "8.7"},
+    {"name": "NVIDIA RTX 40 series / L4 / L40 / L40S", "vendor": "nvidia", "arch": "8.9"},
+    {"name": "NVIDIA H100 / H200 / GH200", "vendor": "nvidia", "arch": "9.0"},
+    {"name": "NVIDIA B100 / B200 / GB200", "vendor": "nvidia", "arch": "10.0"},
+    {"name": "NVIDIA B300 / GB300", "vendor": "nvidia", "arch": "10.3"},
+    {"name": "NVIDIA RTX 50 series / RTX PRO Blackwell", "vendor": "nvidia", "arch": "12.0"},
+    {"name": "AMD Instinct MI25", "vendor": "amd", "arch": "gfx900"},
+    {"name": "AMD Instinct MI50 / MI60 / Radeon VII", "vendor": "amd", "arch": "gfx906"},
+    {"name": "AMD Instinct MI100", "vendor": "amd", "arch": "gfx908"},
+    {"name": "AMD Instinct MI210 / MI250 / MI250X", "vendor": "amd", "arch": "gfx90a"},
+    {"name": "AMD Instinct MI300A / MI300X / MI325X", "vendor": "amd", "arch": "gfx942"},
+    {"name": "AMD Instinct MI350X / MI355X", "vendor": "amd", "arch": "gfx950"},
+    {"name": "AMD RX 6800/6900 series / PRO W6800 / PRO V620", "vendor": "amd", "arch": "gfx1030"},
+    {"name": "AMD RX 7900 XTX/XT/GRE / PRO W7900 / PRO W7800", "vendor": "amd", "arch": "gfx1100"},
+    {"name": "AMD RX 7800 XT / RX 7700 XT / PRO W7700 / PRO V710", "vendor": "amd", "arch": "gfx1101"},
+    {"name": "AMD RX 7600 / PRO W7600", "vendor": "amd", "arch": "gfx1102"},
+    {"name": "AMD RX 9060 series", "vendor": "amd", "arch": "gfx1200"},
+    {"name": "AMD RX 9070 series / AI PRO R9700", "vendor": "amd", "arch": "gfx1201"}
+  ]
+}
