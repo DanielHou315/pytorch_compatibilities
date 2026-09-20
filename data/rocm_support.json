@@ -1,5 +1,5 @@
 {
-  "_source": "https://rocm.docs.amd.com/projects/install-on-linux/en/latest/reference/system-requirements.html and historical ROCm release notes",
+  "_source": "https://rocm.docs.amd.com/en/docs-<version>/compatibility/compatibility-matrix.html (per-release), https://rocm.docs.amd.com/projects/install-on-linux/en/latest/reference/system-requirements.html and historical ROCm release notes",
   "_comment": "AMD GPU architectures (gfx targets) officially supported by each ROCm minor release on Linux. Many additional consumer GPUs work unofficially (e.g. via HSA_OVERRIDE_GFX_VERSION). Keys are ROCm major.minor; patch releases inherit the minor entry.",
   "support": {
     "3.7": ["gfx900", "gfx906", "gfx908"],
@@ -25,6 +25,7 @@
     "6.4": ["gfx908", "gfx90a", "gfx942", "gfx950", "gfx1030", "gfx1100", "gfx1101", "gfx1200", "gfx1201"],
     "7.0": ["gfx908", "gfx90a", "gfx942", "gfx950", "gfx1030", "gfx1100", "gfx1101", "gfx1200", "gfx1201"],
     "7.1": ["gfx908", "gfx90a", "gfx942", "gfx950", "gfx1030", "gfx1100", "gfx1101", "gfx1200", "gfx1201"],
-    "7.2": ["gfx908", "gfx90a", "gfx942", "gfx950", "gfx1030", "gfx1100", "gfx1101", "gfx1200", "gfx1201"]
+    "7.2": ["gfx908", "gfx90a", "gfx942", "gfx950", "gfx1030", "gfx1100", "gfx1101", "gfx1200", "gfx1201"],
+    "7.14": ["gfx908", "gfx90a", "gfx942", "gfx950", "gfx1030", "gfx1100", "gfx1101", "gfx1102", "gfx1103", "gfx1150", "gfx1151", "gfx1152", "gfx1153", "gfx1200", "gfx1201"]
   }
 }

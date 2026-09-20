@@ -3,6 +3,8 @@
 import json
 from pathlib import Path
 
+import pytest
+
 DATA = Path(__file__).resolve().parent.parent / "data"
 
 
@@ -18,6 +20,7 @@ class TestTorchMatrix:
         for old in ("0.4.0", "1.10.0", "1.13.1", "2.0.0"):
             assert old in versions, f"torch {old} missing from matrix"
 
+    @pytest.mark.curated_data
     def test_every_cuda_version_has_driver_and_sm_entries(self):
         combos = _load("torch_matrix.json")["combos"]
         cuda_vers = {c["accel_ver"] for c in combos if c["accel"] == "cuda"}
@@ -28,6 +31,7 @@ class TestTorchMatrix:
         assert not missing_driver, f"cuda_drivers.json missing: {missing_driver}"
         assert not missing_sm, f"cuda_sm_support.json missing: {missing_sm}"
 
+    @pytest.mark.curated_data
     def test_every_rocm_version_resolves(self):
         combos = _load("torch_matrix.json")["combos"]
         rocm = _load("rocm_support.json")["support"]
