@@ -1,6 +1,9 @@
 # Weekly: Claude checks vendor release notes for new hardware / toolkit
 # releases and opens a PR updating the curated data files when they're stale.
-# Requires the ANTHROPIC_API_KEY repository secret; skips quietly without it.
+# Needs credentials in one of two repository secrets -- CLAUDE_CODE_OAUTH_TOKEN
+# (from `claude setup-token`, uses a Claude subscription) or ANTHROPIC_API_KEY
+# (billed per token). Either one works on its own -- set just one. With
+# neither, the job skips quietly.
 name: Hardware support watch (Claude)
 
 on:
@@ -16,16 +19,18 @@ jobs:
   watch:
     runs-on: ubuntu-latest
     steps:
-      - name: Check for API key
+      - name: Check for Claude credentials
         id: key
         env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          if [ -n "$ANTHROPIC_API_KEY" ]; then
+          if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ] || [ -n "$ANTHROPIC_API_KEY" ]; then
             echo "present=true" >> "$GITHUB_OUTPUT"
           else
             echo "present=false" >> "$GITHUB_OUTPUT"
-            echo "ANTHROPIC_API_KEY secret not set; skipping hardware watch."
+            echo "Neither CLAUDE_CODE_OAUTH_TOKEN nor ANTHROPIC_API_KEY is set;" \
+                 "skipping hardware watch."
           fi
 
       - uses: actions/checkout@v4
@@ -36,6 +41,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         with:
+          # Both inputs are optional; an unset secret passes through as empty.
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           claude_args: "--model claude-opus-4-8"
           prompt: |
