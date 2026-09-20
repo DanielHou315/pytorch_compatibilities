@@ -35,7 +35,9 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run tests
-        run: python -m pytest tests/ -q
+        # Curated-data coverage runs in its own job: a brand-new CUDA/ROCm
+        # release must not stall the daily refresh and deploy.
+        run: python -m pytest tests/ -q -m "not curated_data"
 
       - name: Update compatibility data from PyTorch wheel index
         run: python scripts/update_data.py
@@ -62,6 +64,29 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: _site
+
+  # Reports (but does not block on) hand-curated data that has fallen behind
+  # the freshly scraped wheel index -- e.g. PyTorch shipping wheels for a ROCm
+  # or CUDA version that data/rocm_support.json or data/cuda_*.json don't cover
+  # yet. The fix is to add the missing entry to the curated file.
+  curated-data:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Refresh matrix from the live wheel index
+        run: python scripts/update_data.py
+
+      - name: Check curated data covers every accelerator version
+        run: python -m pytest tests/ -q -m curated_data
 
   deploy:
     if: github.event_name != 'pull_request'
