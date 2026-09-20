@@ -41,10 +41,15 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         with:
+          # Without an explicit token the action mints one via OIDC, which
+          # needs `id-token: write` plus the Claude GitHub App installed. The
+          # job only pushes a branch and opens a PR, so the built-in token
+          # (scoped by `permissions:` above) is enough.
+          github_token: ${{ github.token }}
           # Both inputs are optional; an unset secret passes through as empty.
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          claude_args: "--model claude-opus-4-8"
+          claude_args: "--model claude-sonnet-5"
           prompt: |
             You maintain the curated hardware-compatibility data of this PyTorch
             compatibility site. The wheel matrix (data/torch_matrix.json) updates
