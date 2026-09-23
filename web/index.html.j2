@@ -3,9 +3,24 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>PyTorch Compatibility Matrix — CUDA, ROCm, XPU &amp; CPU</title>
-  <meta name="description" content="Find compatible combinations of PyTorch, Python, CUDA, ROCm and Intel XPU versions, minimum NVIDIA driver versions, supported AMD GPU architectures, and the matching pip install command.">
+  <title>PyTorch CUDA &amp; ROCm Compatibility Matrix — Versions, Drivers &amp; pip install</title>
+  <meta name="description" content="Which CUDA, ROCm, Python and NVIDIA driver versions work with each PyTorch release? Search every official PyTorch build (CUDA, ROCm, Intel XPU, CPU) and get the exact pip install command. Latest: PyTorch {{ latest.torch }}.">
+  <meta name="keywords" content="PyTorch CUDA compatibility, PyTorch CUDA version, PyTorch ROCm version, PyTorch Python version, NVIDIA driver version, torch cuda matrix, pip install torch cuda, PyTorch compute capability, AMD gfx">
+  <meta name="author" content="Daniel Hou">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#ee4c2c">
   <link rel="canonical" href="https://{{ domain }}/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="PyTorch Compatibility Matrix">
+  <meta property="og:url" content="https://{{ domain }}/">
+  <meta property="og:title" content="PyTorch CUDA &amp; ROCm Compatibility Matrix">
+  <meta property="og:description" content="Find which CUDA, ROCm, Python and driver versions work with every PyTorch release — plus the exact pip install command.">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="PyTorch CUDA &amp; ROCm Compatibility Matrix">
+  <meta name="twitter:description" content="Find which CUDA, ROCm, Python and driver versions work with every PyTorch release — plus the exact pip install command.">
+  <script type="application/ld+json">
+  {{ structured_data | safe }}
+  </script>
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔥</text></svg>">
 </head>
@@ -21,7 +36,7 @@
     <a href="https://download.pytorch.org/whl/torch/">download.pytorch.org</a>
     · last updated <time datetime="{{ generated_utc }}">{{ generated_utc }}</time>
     · {{ n_combos }} build combinations
-    · <a href="https://github.com/DanielHou315/pytorch_compatibilities">source on GitHub</a>
+    · <a href="https://github.com/DanielHou315/torch-compat">source on GitHub</a>
   </p>
 </header>
 
@@ -73,6 +88,38 @@
   </table>
 
   <nav id="pager" class="pager" aria-label="Result pages"></nav>
+
+  <section class="notes" id="versions">
+    <h2>PyTorch versions at a glance</h2>
+    <p>CUDA, ROCm and Python versions with official wheels for each stable PyTorch release.</p>
+    <details>
+      <summary>Show all {{ summary | length }} releases</summary>
+      <table class="summary">
+        <thead>
+          <tr><th>PyTorch</th><th>CUDA</th><th>ROCm</th><th>Intel XPU</th><th>Python</th></tr>
+        </thead>
+        <tbody>
+        {%- for r in summary %}
+          <tr>
+            <td>{{ r.torch }}</td>
+            <td>{{ r.cuda | join(", ") or "—" }}</td>
+            <td>{{ r.rocm | join(", ") or "—" }}</td>
+            <td>{{ "yes" if r.xpu else "—" }}</td>
+            <td>{{ r.python | join(", ") }}</td>
+          </tr>
+        {%- endfor %}
+        </tbody>
+      </table>
+    </details>
+  </section>
+
+  <section class="notes" id="faq">
+    <h2>FAQ</h2>
+    {%- for q in faq %}
+    <h3>{{ q.q }}</h3>
+    <p>{{ q.a }}</p>
+    {%- endfor %}
+  </section>
 
   <section class="notes">
     <h2>Notes</h2>
