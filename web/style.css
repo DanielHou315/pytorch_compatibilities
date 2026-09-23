@@ -1,22 +1,38 @@
+/* Nord palette (https://www.nordtheme.com). Light by default, dark when the
+   OS prefers it, and data-theme on <html> (set by the toggle) overrides both. */
 :root {
-  --bg: #ffffff;
-  --fg: #1c1e21;
-  --muted: #5f6368;
-  --border: #e0e0e0;
-  --accent: #ee4c2c; /* PyTorch flame orange */
-  --row-alt: #fafafa;
-  --code-bg: #f4f4f5;
+  color-scheme: light;
+  --bg: #eceff4;        /* nord6 */
+  --fg: #2e3440;        /* nord0 */
+  --muted: #4c566a;     /* nord3 */
+  --border: #d8dee9;    /* nord4 */
+  --accent: #b5553a;    /* nord12, darkened for contrast on light */
+  --row-alt: #e5e9f0;   /* nord5 */
+  --code-bg: #dfe4ec;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #16181d;
-    --fg: #e8eaed;
-    --muted: #9aa0a6;
-    --border: #33363d;
-    --row-alt: #1c1f26;
-    --code-bg: #24272e;
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #2e3440;      /* nord0 */
+    --fg: #eceff4;      /* nord6 */
+    --muted: #b4bccb;
+    --border: #4c566a;  /* nord3 */
+    --accent: #d08770;  /* nord12 */
+    --row-alt: #353c4a;
+    --code-bg: #3b4252; /* nord1 */
   }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #2e3440;
+  --fg: #eceff4;
+  --muted: #b4bccb;
+  --border: #4c566a;
+  --accent: #d08770;
+  --row-alt: #353c4a;
+  --code-bg: #3b4252;
 }
 
 * { box-sizing: border-box; }
@@ -30,7 +46,17 @@ body {
   font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-h1 { margin: 0 0 .25rem; font-size: 1.7rem; }
+header { position: relative; }
+h1 { margin: 0 0 .25rem; padding-right: 3rem; font-size: 1.7rem; }
+
+.theme-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: .4rem .5rem;
+}
 .subtitle { margin: 0 0 .5rem; color: var(--muted); }
 .meta { margin: 0 0 1.5rem; font-size: .85rem; color: var(--muted); }
 

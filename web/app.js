@@ -308,3 +308,26 @@ window.addEventListener("load", () => {
   fillGpuOptions();
   render();
 });
+
+// Light/dark toggle. Without a saved choice the theme follows the OS.
+const themeToggle = document.getElementById("theme-toggle");
+const darkQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+function currentTheme() {
+  return document.documentElement.dataset.theme || (darkQuery.matches ? "dark" : "light");
+}
+
+function syncThemeToggle() {
+  const dark = currentTheme() === "dark";
+  themeToggle.textContent = dark ? "☀️" : "🌙";
+  themeToggle.title = dark ? "Switch to light theme" : "Switch to dark theme";
+}
+
+themeToggle.addEventListener("click", () => {
+  const next = currentTheme() === "dark" ? "light" : "dark";
+  document.documentElement.dataset.theme = next;
+  try { localStorage.setItem("theme", next); } catch (e) {}
+  syncThemeToggle();
+});
+darkQuery.addEventListener("change", syncThemeToggle);
+syncThemeToggle();

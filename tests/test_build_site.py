@@ -11,6 +11,7 @@ def test_build_outputs(tmp_path):
     index = (out / "index.html").read_text()
     assert 'id="dataset"' in index
     assert 'id="f-torch"' in index
+    assert 'id="theme-toggle"' in index
     assert "elenacliu" in index  # acknowledgement must stay
 
     assert (out / "CNAME").read_text().strip() == SITE_DOMAIN
