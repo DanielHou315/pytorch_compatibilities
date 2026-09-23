@@ -1,6 +1,6 @@
 """Tests for parsing the PyTorch wheel index."""
 
-from torchcompat.wheel_index import (
+from wheel_index import (
     aggregate,
     cu_tag_to_version,
     parse_index_html,

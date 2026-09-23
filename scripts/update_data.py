@@ -7,9 +7,7 @@ import json
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-
-from torchcompat.wheel_index import INDEX_URL, aggregate, fetch_index, parse_index_html
+from wheel_index import INDEX_URL, aggregate, fetch_index, parse_index_html
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 OUTPUT = REPO_ROOT / "data" / "torch_matrix.json"

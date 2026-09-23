@@ -1,10 +1,12 @@
-# 🔥 PyTorch Compatibility Matrix
+# 🔥 PyTorch Compatibility Matrix — CUDA, ROCm, Python & Driver Versions
 
 **Live site: [torch-compat.danielhou.me](https://torch-compat.danielhou.me)**
 
-Find compatible combinations of **PyTorch × Python × accelerator stack × OS**, the
-minimum driver you need, and the exact `pip install` command — for every official
-PyTorch build ever published:
+Which CUDA version works with my PyTorch? Which NVIDIA driver do I need? Does my
+AMD GPU run the ROCm wheels? This site answers those questions for **every
+official PyTorch build ever published**. Pick a combination of
+**PyTorch × Python × accelerator stack × OS** and get the minimum driver and the
+exact `pip install` command:
 
 - **NVIDIA CUDA** (cu75 → cu132) with minimum driver versions from the NVIDIA release notes
 - **AMD ROCm** (3.7 → 7.x) with officially supported GPU architectures (gfx targets)
@@ -18,65 +20,12 @@ Jetson is Linux aarch64 only and needs
 [NVIDIA's JetPack wheels](https://docs.nvidia.com/deeplearning/frameworks/install-pytorch-jetson-platform/index.html)
 rather than the SBSA server wheels on download.pytorch.org.
 
-## How it works
+## Contributing
 
-Everything is a static site — no server, no database:
-
-1. `scripts/update_data.py` scrapes the official
-   [PyTorch wheel index](https://download.pytorch.org/whl/torch/). Every wheel
-   filename encodes a full compatibility record
-   (`torch-2.5.1+rocm6.2.4-cp312-cp312-linux_x86_64.whl`), so one HTTP request
-   yields the whole matrix → `data/torch_matrix.json`.
-2. Hand-curated reference data lives in `data/`:
-   `cuda_drivers.json` (CUDA → minimum driver), `cuda_sm_support.json`
-   (CUDA → compute capabilities), `rocm_support.json` (ROCm → gfx targets),
-   `gpus.json` (GPU name → architecture).
-3. `scripts/build_site.py` renders it all into a single self-contained page
-   (`_site/`) with client-side filtering in vanilla JS.
-
-### Automatic updates
-
-A [GitHub Actions workflow](.github/workflows/update-and-deploy.yml) runs **daily**:
-it re-scrapes the wheel index, commits the data when PyTorch publishes new wheels
-(new releases, new CUDA/ROCm/XPU variants), runs the tests, and redeploys the site
-to GitHub Pages. New PyTorch releases appear on the site within a day, with no
-manual steps.
-
-## Running locally
-
-```bash
-pip install -r requirements.txt
-python -m pytest                  # run tests
-python scripts/update_data.py     # refresh data/torch_matrix.json
-python scripts/build_site.py      # build into _site/
-python -m http.server -d _site    # browse at http://localhost:8000
-```
-
-## Deploying your own
-
-1. Push to GitHub and enable **Settings → Pages → Source: GitHub Actions**.
-2. (Custom domain) Add a DNS `CNAME` record pointing your subdomain at
-   `<username>.github.io`, and set the domain in **Settings → Pages**. The build
-   already ships a `CNAME` file for `torch-compat.danielhou.me` — change
-   `SITE_DOMAIN` in `scripts/build_site.py` for your own domain.
-3. The scheduled workflow needs no secrets — it commits with the built-in
-   `GITHUB_TOKEN`.
-
-## Updating the curated data
-
-The wheel matrix updates itself. The small curated files change only when NVIDIA
-or AMD ship something new — each file carries a `_source` URL; PRs welcome.
-
-On top of that, a second workflow
-([hardware-watch.yml](.github/workflows/hardware-watch.yml)) runs
-[Claude Code](https://github.com/anthropics/claude-code-action) weekly: it
-compares the curated files against the NVIDIA CUDA release notes, AMD's ROCm
-system requirements, the PyTorch release notes, and the accelerator versions
-appearing in the wheel matrix, and **opens a pull request** when new hardware or
-toolkit versions are missing. It requires an `ANTHROPIC_API_KEY` repository
-secret (Settings → Secrets and variables → Actions) and skips quietly when the
-secret is absent. Changes always arrive as a PR for human review, never as a
-direct push.
+Contributions are welcome! If you spot missing or wrong data (a new GPU, CUDA
+toolkit, driver or ROCm version) or want to improve the site, please
+[fork the repository](https://github.com/DanielHou315/torch-compat/fork), make
+your changes on a branch, and open a pull request.
 
 ## Acknowledgements
 

@@ -1,10 +1,6 @@
 """Smoke tests: the built site contains the dataset and UI scaffolding."""
 
 import json
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 
 from build_site import SITE_DOMAIN, build
 
@@ -21,6 +17,21 @@ def test_build_outputs(tmp_path):
     assert (out / ".nojekyll").exists()
     assert (out / "app.js").exists()
     assert (out / "style.css").exists()
+    assert SITE_DOMAIN in (out / "sitemap.xml").read_text()
+    assert "Sitemap:" in (out / "robots.txt").read_text()
+    assert not (out / "index.html.j2").exists()
+
+
+def test_seo_content_is_server_rendered(tmp_path):
+    out = build(tmp_path / "_site")
+    index = (out / "index.html").read_text()
+    start = index.index('<script type="application/ld+json">') + len(
+        '<script type="application/ld+json">'
+    )
+    ld = json.loads(index[start:index.index("</script>", start)])
+    assert {n["@type"] for n in ld["@graph"]} >= {"WebApplication", "FAQPage"}
+    # The version table is in the HTML itself, crawlable without JS.
+    assert "<td>2.0.0</td>" in index
 
 
 def test_embedded_dataset_is_valid_json(tmp_path):
